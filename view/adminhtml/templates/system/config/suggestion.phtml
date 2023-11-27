@@ -1,0 +1,198 @@
+<?php
+/**
+ * @author    JaJuMa GmbH <info@jajuma.de>
+ * @copyright Copyright (c) 2023 JaJuMa GmbH <https://www.jajuma.de>. All rights reserved.
+ * @license   http://opensource.org/licenses/mit-license.php MIT License
+ */
+use Jajuma\PotWeather\Block\System\Config\AddressSugguest;
+/** @var AddressSugguest $block */
+?>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    var addressNameInput = document.getElementById("power_toys_weather_address_name");
+    var addressIPInput = document.getElementById("power_toys_weather_address_id");
+      /*the autocomplete function takes two arguments,
+      the text field element and an array of possible autocompleted values:*/
+      var currentFocus;
+      /*execute a function when someone writes in the text field:*/
+      function debounce(callback, wait) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(function () { callback.apply(this, args); }, wait);
+        };
+      }
+      addressNameInput.addEventListener("keyup", debounce( () => {
+        displayAddressSuggestion();
+      }, 1000))
+      /*execute a function presses a key on the keyboard:*/
+      addressNameInput.addEventListener("keydown", function(e) {
+          var x = document.getElementById(this.id + "autocomplete-list");
+          if (x) x = x.getElementsByTagName("div");
+          if (e.keyCode == 40) {
+            /*If the arrow DOWN key is pressed,
+            increase the currentFocus variable:*/
+            currentFocus++;
+            /*and and make the current item more visible:*/
+            addActive(x);
+          } else if (e.keyCode == 38) { //up
+            /*If the arrow UP key is pressed,
+            decrease the currentFocus variable:*/
+            currentFocus--;
+            /*and and make the current item more visible:*/
+            addActive(x);
+          } else if (e.keyCode == 13) {
+            /*If the ENTER key is pressed, prevent the form from being submitted,*/
+            e.preventDefault();
+            if (currentFocus > -1) {
+              /*and simulate a click on the "active" item:*/
+              if (x) x[currentFocus].click();
+            }
+          }
+      });
+      function displayAddressSuggestion () {
+        var a, b, i, title, val = addressNameInput.value;
+        /*close any already open lists of autocompleted values*/
+        closeAllLists();
+        if (!val) { return false;}
+        
+        fetch('<?= $block->getUrl('jajuma_potweather/weather/address'); ?>' + '?name=' + val, {
+            method: 'GET'
+        }).then((res) => {
+            res.json().then(function (response) {
+                console.log(response);
+                //create city
+                console.log(response.data.cities);
+                //create place
+                console.log(response.data.places);
+                currentFocus = -1;
+                if (document.getElementById("address-autocomplete-list")) {
+                  document.getElementById("address-autocomplete-list").innerHTML = '';
+                  a = document.getElementById("address-autocomplete-list");
+                } else {
+                  /*create a DIV element that will contain the items (values):*/
+                  a = document.createElement("DIV");
+                  a.setAttribute("id", "address-autocomplete-list");
+                  a.setAttribute("class", "autocomplete-items");
+                  /*append the DIV element as a child of the autocomplete container:*/
+                  addressNameInput.parentNode.appendChild(a);
+                }
+                var cities = response.data.cities;
+                if (cities.length > 0) {
+                  title = document.createElement("DIV");
+                  title.innerHTML = 'Cities';
+                  title.classList.add('title');
+                  a.appendChild(title);
+                  /*for each item in the array...*/
+                  for (i = 0; i < cities.length; i++) {
+                      var addressName = cities[i]['name'] + ', ' + cities[i]['state'] + ', ' + cities[i]['country'];
+                      /*create a DIV element for each matching element:*/
+                      b = document.createElement("DIV");
+                      /*make the matching letters bold:*/
+                      b.innerHTML += addressName;
+                      /*insert a input field that will hold the current array item's value:*/
+                      b.innerHTML += "<input type='hidden' data-address-name='" + addressName + "' data-address-id='" + cities[i]['id'] + "'>";
+                      /*execute a function when someone clicks on the item value (DIV element):*/
+                      b.addEventListener("click", function(e) {
+                          /*insert the value for the autocomplete text field:*/
+                          addressNameInput.value = this.getElementsByTagName("input")[0].dataset.addressName;
+                          addressIPInput.value = this.getElementsByTagName("input")[0].dataset.addressId;
+                          /*close the list of autocompleted values,
+                          (or any other open lists of autocompleted values:*/
+                          closeAllLists();
+                      });
+                      a.appendChild(b);
+                  }
+                }
+                var places = response.data.places;
+                if (cities.length > 0) {
+                  title = document.createElement("DIV");
+                  title.classList.add('title');
+                  title.innerHTML = 'Places';
+                  a.appendChild(title);
+                  /*for each item in the array...*/
+                  for (i = 0; i < places.length; i++) {
+                      var addressName = places[i]['name'] + ', ' + places[i]['country'];
+                      /*create a DIV element for each matching element:*/
+                      b = document.createElement("DIV");
+                      /*make the matching letters bold:*/
+                      b.innerHTML += addressName;
+                      /*insert a input field that will hold the current array item's value:*/
+                      b.innerHTML += "<input type='hidden' data-address-name='" + addressName + "' data-address-id='" + places[i]['id'] + "'>";
+                      /*execute a function when someone clicks on the item value (DIV element):*/
+                      b.addEventListener("click", function(e) {
+                          /*insert the value for the autocomplete text field:*/
+                          addressNameInput.value = this.getElementsByTagName("input")[0].value;
+                          addressIPInput.value = this.getElementsByTagName("input")[0].dataset.addressId;
+                          /*close the list of autocompleted values,
+                          (or any other open lists of autocompleted values:*/
+                          closeAllLists();
+                      });
+                      a.appendChild(b);
+                  }
+                }
+          });
+        })
+        .catch(() => {
+        })
+        .finally(() => {
+        });
+      }
+      function addActive(x) {
+        /*a function to classify an item as "active":*/
+        if (!x) return false;
+        /*start by removing the "active" class on all items:*/
+        removeActive(x);
+        if (currentFocus >= x.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (x.length - 1);
+        /*add class "autocomplete-active":*/
+        x[currentFocus].classList.add("autocomplete-active");
+      }
+      function removeActive(x) {
+        /*a function to remove the "active" class from all autocomplete items:*/
+        for (var i = 0; i < x.length; i++) {
+          x[i].classList.remove("autocomplete-active");
+        }
+      }
+      function closeAllLists(elmnt) {
+        /*close all autocomplete lists in the document,
+        except the one passed as an argument:*/
+        var x = document.getElementsByClassName("autocomplete-items");
+        for (var i = 0; i < x.length; i++) {
+          if (elmnt != x[i] && elmnt != addressNameInput) {
+            x[i].parentNode.removeChild(x[i]);
+          }
+        }
+      }
+      /*execute a function when someone clicks in the document:*/
+      document.addEventListener("click", function (e) {
+          closeAllLists(e.target);
+      });
+});
+</script>
+<style>
+.autocomplete-items {
+  height: 490px;
+  overflow-y: auto;
+  border: 1px solid #adadad;
+  background-color: #ffffff;
+}
+.autocomplete-items > div {
+  color: #303030;
+  padding: 8px;
+  font-size: 14px;
+}
+.autocomplete-items > div:not(.title):hover {
+  cursor: pointer;
+}
+.autocomplete-items > div.title {
+  background: #e3e3e3;
+  cursor: default;
+}
+#row_power_toys_weather_address_id {
+  display: none;
+}
+#row_power_toys_weather_address_sugguestion {
+  display: none;
+}
+</style>

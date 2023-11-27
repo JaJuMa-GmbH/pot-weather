@@ -1,0 +1,153 @@
+<?php
+/**
+ * @author    JaJuMa GmbH <info@jajuma.de>
+ * @copyright Copyright (c) 2023 JaJuMa GmbH <https://www.jajuma.de>. All rights reserved.
+ * @license   http://opensource.org/licenses/mit-license.php MIT License
+ */
+use Jajuma\PotWeather\Block\PowerToys\Weather;
+use Magento\Framework\Escaper;
+/** @var Weather $block */
+/** @var Escaper $escaper */
+$locale = $block->getLocaleCode();
+$langCode = strstr($locale, '_', true);
+?>
+<script>
+        (function(d, s, id) {
+            if (d.getElementById(id)) {
+                if (window.__TOMORROW__) {
+                    window.__TOMORROW__.renderWidget();
+                }
+                return;
+            }
+            const fjs = d.getElementsByTagName(s)[0];
+            const js = d.createElement(s);
+            js.id = id;
+            js.src = "https://www.tomorrow.io/v1/widget/sdk/sdk.bundle.min.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        })(document, 'script', 'tomorrow-sdk');
+</script>
+<div class="weather-more-details" onmouseover="viewWeatherDetails()">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+    </svg>
+</div>
+<div class="tomorrow"
+    data-location-id="<?= $block->getWeatherLocation() ?>"
+    data-language="<?= strtoupper($langCode) ?>"
+    data-unit-system="<?= strtoupper((string) $block->getWeatherUnits()) ?>"
+    data-skin="<?= $block->getWeatherSkin() ?>"
+    data-widget-type="aqiMini"
+    style="padding-bottom:22px;position:relative;"
+>
+    <a
+    href="https://www.tomorrow.io/weather-api/"
+    rel="nofollow noopener noreferrer"
+    target="_blank"
+    style="position: absolute; bottom: 0; transform: translateX(-50%); left: 50%;"
+    >
+    <img
+        alt="Powered by the Tomorrow.io Weather API"
+        src="https://weather-website-client.tomorrow.io/img/powered-by.svg"
+        width="250"
+        height="18"
+    />
+    </a>
+</div>
+<div class="weather-next-day">
+<script>
+    (function(d, s, id) {
+        if (d.getElementById(id)) {
+            if (window.__TOMORROW__) {
+                window.__TOMORROW__.renderWidget();
+            }
+            return;
+        }
+        const fjs = d.getElementsByTagName(s)[0];
+        const js = d.createElement(s);
+        js.id = id;
+        js.src = "https://www.tomorrow.io/v1/widget/sdk/sdk.bundle.min.js";
+
+        fjs.parentNode.insertBefore(js, fjs);
+    })(document, 'script', 'tomorrow-sdk');
+
+
+    const viewWeatherDetails = () => {
+        document.querySelector(".weather-more-details").addEventListener('mouseover', function () {
+            const weatherWidget = document.querySelector(".widget-item-default_weather");
+            const weatherNextDay = weatherWidget.querySelector(".weather-next-day");
+
+            weatherNextDay.style.left = weatherWidget.getBoundingClientRect().left - 55 + "px";
+            weatherNextDay.style.width = weatherWidget.offsetWidth + "px";
+        });
+    }
+
+    </script>
+
+    <div class="tomorrow"
+        data-location-id="<?= $block->getWeatherLocation() ?>"
+        data-language="<?= strtoupper($langCode) ?>"
+        data-unit-system="<?= strtoupper((string) $block->getWeatherUnits()) ?>"
+        data-skin="<?= $block->getWeatherSkin() ?>"
+        data-widget-type="upcoming"
+        style="padding-bottom:22px;position:relative;"
+    >
+        <a
+        href="https://www.tomorrow.io/weather-api/"
+        rel="nofollow noopener noreferrer"
+        target="_blank"
+        style="position: absolute; bottom: 0; transform: translateX(-50%); left: 50%;"
+        >
+        <img
+            alt="Powered by the Tomorrow.io Weather API"
+            src="https://weather-website-client.tomorrow.io/img/powered-by.svg"
+            width="250"
+            height="18"
+        />
+        </a>
+    </div>
+</div>
+<style>
+.powertoys-dashboard-widgets .widget-item[data-widget-id="default_weather"] {
+    min-width: 320px;
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+}
+.powertoys-dashboard-widgets .widget-item[data-widget-id="default_weather"] > .tomorrow iframe {
+    height: 100% !important;
+}
+.powertoys-dashboard-widgets .widget-item[data-widget-id="default_weather"] .weather-next-day {
+    position: fixed;
+    top: 0;
+    transform: scaleY(0) translate(-10px, 10%);
+    transition: .2s all ease;
+    overflow: hidden;
+}
+.powertoys-dashboard-widgets .widget-item[data-widget-id="default_weather"] .weather-more-details:hover ~ .tomorrow {
+    filter: blur(6px);
+}
+.powertoys-dashboard-widgets .widget-item[data-widget-id="default_weather"] .weather-more-details:hover ~ .weather-next-day,
+.powertoys-dashboard-widgets .widget-item[data-widget-id="default_weather"] .weather-next-day:hover {
+    transform: scaleY(1) translate(-10px, 10%);
+    transition: .6s all ease;
+    z-index: 2;
+}
+.powertoys-dashboard-widgets .widget-item[data-widget-id="default_weather"] .weather-more-details {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: #a46aae;
+    border-radius: 100%;
+    padding: 4px;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.3);
+    transition: .3s ease shadow;
+    z-index: 1;
+}
+.powertoys-dashboard-widgets .widget-item[data-widget-id="default_weather"] .weather-more-details:hover {
+    transform: scale(1.1);
+}
+</style>

@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author    JaJuMa GmbH <info@jajuma.de>
+ * @copyright Copyright (c) 2023-present JaJuMa GmbH <https://www.jajuma.de>. All rights reserved.
+ * @license   http://opensource.org/licenses/mit-license.php MIT License
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="jajuma" translate="label" class="jajuma-tab" sortOrder="10">
+            <label>Jajuma</label>
+        </tab>
+        <section id="power_toys" translate="label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Power Toys</label>
+            <tab>jajuma</tab>
+            <resource>Jajuma_PotWeather::config_jajuma_powertoy</resource>
+            <group id="weather" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Weather</label>
+                <field id="is_enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="type_location" translate="label" type="select" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="20">
+                    <label>Type Location</label>
+                    <source_model>Jajuma\PotWeather\Model\Config\Source\Location\Type</source_model>
+                    <depends>
+                        <field id="is_enabled">1</field>
+                    </depends>
+                </field>
+                <field id="address_id" translate="label" type="hidden" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="30">
+                    <depends>
+                        <field id="is_enabled">1</field>
+                        <field id="type_location">0</field>
+                    </depends>
+                </field>
+                <field id="address_name" translate="label" type="text" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="40">
+                    <label>Address Name</label>
+                    <depends>
+                        <field id="is_enabled">1</field>
+                        <field id="type_location">0</field>
+                    </depends>
+                    <comment><![CDATA[
+                        Search address by city or place
+                    ]]>
+                    </comment>
+                </field>
+                <field id="address_sugguestion" translate="label" type="text" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="50">
+                    <label>Address Name</label>
+                    <frontend_model>Jajuma\PotWeather\Block\System\Config\AddressSugguest</frontend_model>
+                    <depends>
+                        <field id="type_location">0</field>
+                    </depends>
+                </field>
+                <field id="skin" translate="label" type="select" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="60">
+                    <label>Skin</label>
+                    <source_model>Jajuma\PotWeather\Model\Config\Source\Skin</source_model>
+                    <depends>
+                        <field id="is_enabled">1</field>
+                    </depends>
+                </field>
+                <field id="units" translate="label" type="select" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="70">
+                    <label>Units</label>
+                    <source_model>Jajuma\PotWeather\Model\Config\Source\Units</source_model>
+                    <depends>
+                        <field id="is_enabled">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
