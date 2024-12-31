@@ -10,8 +10,10 @@ use Magento\Framework\Escaper;
 /** @var Escaper $escaper */
 $locale = $block->getLocaleCode();
 $langCode = strstr($locale, '_', true);
+$powerToysHelper = $this->helper(\Jajuma\PowerToys\Helper\Data::class);
+$nonce = $powerToysHelper->getNonce();
 ?>
-<script>
+<script <?= $nonce ? 'nonce="' . $nonce . '"' : '' ?>>
         (function(d, s, id) {
             if (d.getElementById(id)) {
                 if (window.__TOMORROW__) {
@@ -54,7 +56,7 @@ $langCode = strstr($locale, '_', true);
     </a>
 </div>
 <div class="weather-next-day">
-<script>
+<script <?= $nonce ? 'nonce="' . $nonce . '"' : '' ?>>
     (function(d, s, id) {
         if (d.getElementById(id)) {
             if (window.__TOMORROW__) {
